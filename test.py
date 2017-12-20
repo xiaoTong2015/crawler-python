@@ -57,8 +57,27 @@ import re
 # last_page = 11
 # urls = ['http://www.nhfpc.gov.cn/mohwsbwstjxxzx/s8208/list_{0}.shtml'.format(str(i)) for i in range(2,int(str(last_page)))]
 # print(urls)
+a = webdriver.Firefox(executable_path='D:/Program Files (x86)/Mozilla Firefox/geckodriver')
+url = 'http://www.nhfpc.gov.cn/mohwsbwstjxxzx/s7967/201408/650ef76732a1430d805d29151fe58299.shtml'
+time.sleep(10)
+a.get(url)
+a.refresh()
+time.sleep(10)
+html = a.page_source
+#print(html)
+time.sleep(5)
+bs=BeautifulSoup(html, "html.parser")
+#print(bs.prettify())
+#html_p = bs.select('div #allStyleDIV > p')
+html_p = bs.select('div #xw_box > p')
+if not html_p:
+    html_p = bs.select('div #allStyleDIV > p')
+#print(html_p)
 
-urls = ['http://www.nhfpc.gov.cn/mohwsbwstjxxzx/s8208/list_{0}.shtml'.format(str(i)) for i in range(2,int(3)+1)]
-print(urls)
-for url in urls:
-    print("NEXT PAGE："+url)
+item1 = re.search(r'(.{9,10})，全国三级公立医院次均门诊费用为(.*?)元，与去年同期比较，按当年价格["上涨"|"下降"](.*?)，按可比价格["上涨"|"下降"](.*?)；'
+                    r'二级公立医院次均门诊费用为(.*?)元，按当年价格同比["上涨"|"下降"](.*?)，按可比价格[同比上涨|同比下降|与去年同期持平](.*?)。', str(html_p)).groups()
+item2 = re.search(r'全国三级公立医院人均住院费用为(.*?)元，与去年同期比较，按当年价格["上涨"|"下降"](.*?)，按可比价格["上涨"|"下降"](.*?)；'
+                    r'二级公立医院人均住院费用为(.*?)元，按当年价格同比["上涨"|"下降"](.*?)，按可比价格同比["上涨"|"下降"](.*?)。', str(html_p)).groups()
+print(item1+item2)
+
+a.close()
