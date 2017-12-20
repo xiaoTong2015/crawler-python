@@ -27,64 +27,67 @@ import re
     # print('Data:', data.decode('utf-8'))
 # def find_by_title(tag):
 #     return tag.has_attr('title') and re.match(r'全国二级以上公立医院病人费用情况',tag.get('title'))
-
-url = 'http://www.nhfpc.gov.cn/mohwsbwstjxxzx/s8208/list.shtml'
-a = webdriver.Firefox(executable_path='D:/Program Files (x86)/Mozilla Firefox/geckodriver')
-#a = webdriver.PhantomJS(executable_path='D:/安装包/phantomjs-1.9.2-windows/phantomjs')
-time.sleep(10)
-a.get(url)
-a.refresh()
-time.sleep(10)
-html = a.page_source
-#print(html)
-time.sleep(5)
-bs=BeautifulSoup(html, "html.parser")
-#print(bs.prettify())
-#print(bs.find_all(title=re.compile("全国二级以上公立医院病人费用情况")))
-link_list = bs.find_all(title=re.compile("全国二级以上公立医院病人费用情况"))
+base_url = 'http://www.nhfpc.gov.cn/'
 link_list_new = []
 tb_all = []
 tb_title = ['时间','全国三级公立医院次均门诊费用','全国三级公立医院次均门诊费用按当年价格上涨','全国三级公立医院次均门诊费用按可比价格上涨','全国二级公立医院次均门诊费用'
     ,'全国二级公立医院次均门诊费用按当年价格上涨','全国二级公立医院次均门诊费用按可比价格上涨','全国三级公立医院人均住院费用','全国三级公立医院人均住院费用按当年价格上涨'
             ,'全国三级公立医院人均住院费用按可比价格上涨','全国二级公立医院人均住院费用','全国二级公立医院人均住院费用按当年价格上涨','全国二级公立医院人均住院费用按可比价格上涨']
 tb_all.append(','.join(tb_title))
-base_url = 'http://www.nhfpc.gov.cn/'
-for link in link_list:
-    matchObj = re.search(r'href="([\w\.\/]+)"', str(link), re.M | re.I)
-    if matchObj:
-        matchStr = matchObj.group(1)
-        #print(matchStr)
-        link_item=re.findall('mohwsbwstjxxzx.*', matchStr)
-        #print(link_item)
-        link_list_new.append(base_url+link_item[0])
-    else:
-        print("NO MATCH")
+a = webdriver.Firefox(executable_path='D:/Program Files (x86)/Mozilla Firefox/geckodriver')
+#a = webdriver.PhantomJS(executable_path='D:/安装包/phantomjs-1.9.2-windows/phantomjs')
 
-for url_item in link_list_new:
-    a.get(url_item)
+def get_bs(url):
+    time.sleep(10)
+    a.get(url)
     a.refresh()
     time.sleep(10)
-    #print('-'*30)
-    #print(a.page_source)
-    item_html = a.page_source
-    bs_item = BeautifulSoup(item_html, "html.parser")
+    html = a.page_source
+    #print(html)
+    time.sleep(5)
+    bs=BeautifulSoup(html, "html.parser")
+    # print(bs.prettify())
+    return bs
+
+def get_newlink_list(bs):
+    link_list = bs.find_all(title=re.compile("全国二级以上公立医院病人费用情况"))
+    for link in link_list:
+        matchObj = re.search(r'href="([\w\.\/]+)"', str(link), re.M | re.I)
+        if matchObj:
+            matchStr = matchObj.group(1)
+            # print(matchStr)
+            link_item = re.findall('mohwsbwstjxxzx.*', matchStr)
+            # print(link_item)
+            link_list_new.append(base_url + link_item[0])
+        else:
+            print("NO MATCH")
+    return True
+
+url = 'http://www.nhfpc.gov.cn/mohwsbwstjxxzx/s8208/list.shtml'
+bs = get_bs(url)
+get_newlink_list(bs)
+#last page
+last_page_text = bs.select('div .pagination_index_last')
+last_page = re.search(r'共 .* 条 共 (.*?) 页', str(last_page_text)).groups()[0]
+#last_page_end
+urls = ['http://www.nhfpc.gov.cn/mohwsbwstjxxzx/s8208/list_{0}.shtml'.format(str(i)) for i in range(2,int(3)+1)]
+for url in urls:
+    print("NEXT PAGE："+url)
+    bs = get_bs(url)
+    get_newlink_list(bs)
+
+#################处理页面上的字段信息################
+for url_item in link_list_new:
+    bs_item = get_bs(url_item)
     html_p = bs_item.select('div #xw_box > p')
-    print(html_p)
-    item1 = re.search(r'(.{9})，全国三级公立医院次均门诊费用为(.*?)元，与去年同期比较，按当年价格["上涨"|"下降"](.*?)，按可比价格["上涨"|"下降"](.*?)；'
+    item1 = re.search(r'(.{9,10})，全国三级公立医院次均门诊费用为(.*?)元，与去年同期比较，按当年价格["上涨"|"下降"](.*?)，按可比价格["上涨"|"下降"](.*?)；'
                     r'二级公立医院次均门诊费用为(.*?)元，按当年价格同比["上涨"|"下降"](.*?)，按可比价格[同比上涨|同比下降|与去年同期持平](.*?)。', str(html_p)).groups()
     item2 = re.search(r'全国三级公立医院人均住院费用为(.*?)元，与去年同期比较，按当年价格["上涨"|"下降"](.*?)，按可比价格["上涨"|"下降"](.*?)；'
                     r'二级公立医院人均住院费用为(.*?)元，按当年价格同比["上涨"|"下降"](.*?)，按可比价格同比["上涨"|"下降"](.*?)。', str(html_p)).groups()
     item3 = item1 + item2
     tb_all.append(','.join(item3))
-    print(tb_all)
-
-    # print(re.search(r'(.{9})，全国三级公立医院次均门诊费用为(.*?)元，与去年同期比较，按当年价格["上涨"|"下降"](.*?)，按可比价格["上涨"|"下降"](.*?)；'
-    #                 r'二级公立医院次均门诊费用为(.*?)元，按当年价格同比["上涨"|"下降"](.*?)，按可比价格[同比上涨|同比下降|与去年同期持平](.*?)。', str(html_p)).groups())
-    #
-    # print(re.search(r'全国三级公立医院人均住院费用为(.*?)元，与去年同期比较，按当年价格["上涨"|"下降"](.*?)，按可比价格["上涨"|"下降"](.*?)；'
-    #                 r'二级公立医院人均住院费用为(.*?)元，按当年价格同比["上涨"|"下降"](.*?)，按可比价格同比["上涨"|"下降"](.*?)。', str(html_p)).groups())
+    #print(tb_all)
     time.sleep(5)
-
 #replace substr
 for l_index in range(len(tb_all)):
     if l_index > 0:
@@ -93,7 +96,6 @@ for l_index in range(len(tb_all)):
         tb_all[l_index] = tb_all[l_index].replace('涨','')
         tb_all[l_index] = tb_all[l_index].replace('降', '-')
         tb_all[l_index] = tb_all[l_index].replace('去年同期持平', '0.00%')
-
 #wirte to file
 file_csv = open('data6.csv', 'w')
 for i in tb_all:
