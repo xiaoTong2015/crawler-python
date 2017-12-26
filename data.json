@@ -1,11 +1,95 @@
 [
     {
+        "pageNO": 4,
+        "name": "各省经济发展水平",
+        "dataSource": "国家统计局--地区数据--分省季度数据--人民生活",
+        "method": "get",
+        "responseType": "json",
+        "baseURL":"http://data.stats.gov.cn/",
+        "requireURL": "http://data.stats.gov.cn/easyquery.htm?m=getOtherWds&dbcode=fsnd&rowcode=zb&colcode=sj&wds=[]",
+        "nextURL": [
+            "http://data.stats.gov.cn/search.htm?s=%s2015GDP&m=searchdata&db=&p=0",
+            "http://data.stats.gov.cn/easyquery.htm?m=QueryData&dbcode=fsnd&rowcode=zb&colcode=sj&wds=[{\"wdcode\":\"reg\",\"valuecode\":\"%s\"}]&dfwds=[{\"wdcode\":\"zb\",\"valuecode\":\"A0A00\"}]"],
+        "tbHead": [
+            "机构",
+            "生产总值(亿元)",
+            "居民人均可支配收入（元）",
+            "城镇居民人均可支配收入（元）",
+            "农村居民人均可支配收入（元）",
+            "居民人均消费支出（元）",
+            "城镇居民人均消费支出（元）",
+            "农村居民人均消费支出（元）"
+        ],
+        "output_file": "tmp.csv"
+    },
+    {
+        "pageNO": 5,
+        "name": "各省市人口统计",
+        "dataSource": "国家统计局--地区数据--分省季度数据--人口",
+        "method": "get",
+        "responseType": "json",
+        "baseURL":"http://data.stats.gov.cn/",
+        "requireURL": "http://data.stats.gov.cn/easyquery.htm?m=getOtherWds&dbcode=fsnd&rowcode=zb&colcode=sj&wds=[]",
+        "nextURL": "http://data.stats.gov.cn/easyquery.htm?m=QueryData&dbcode=fsnd&rowcode=zb&colcode=sj&wds=[{\"wdcode\":\"reg\",\"valuecode\":\"%s\"}]&dfwds=[{\"wdcode\":\"zb\",\"valuecode\":\"%s\"}]",
+        "plates": [{
+            "platename": "年末常住人口",
+            "platecode": "A0301"
+        },{
+            "platename": "人口密度",
+            "platecode": "A0B02"
+        },{
+            "platename": "男性人口占比",
+            "platecode": "A030801"
+        },{
+            "platename": "受教育程度",
+            "platecode": "A030806"
+        }],
+        "tbHead": [
+            "机构",
+            "常住人口数（万人）",
+            "人口密度（人/平方公里）",
+            "男性占比",
+            "大学程度占比",
+            "高中程度占比",
+            "初中占比",
+            "小学占比"
+        ],
+        "fields": [
+            {
+                "fieldname": "常住人口数",
+                "fieldcode": "A030101"
+            },{
+                "fieldname": "人口密度",
+                "fieldcode": "A0B0205"
+            },{
+                "fieldname": "男性占比",
+                "fieldcode": "A03080102"
+            },{
+                "fieldname": "小学占比",
+                "fieldcode": "A03080607"
+            },{
+                "fieldname": "初中占比",
+                "fieldcode": "A0308060A"
+            },{
+                "fieldname": "高中程度占比",
+                "fieldcode": "A0308060D"
+            },{
+                "fieldname": "大学程度占比",
+                "fieldcode": "A0308060G"
+            }
+        ],
+        "output_file": "tmp.csv"
+    },
+    {
         "pageNO": 6,
+        "name":"全国二级以上公立医院病人费用",
+        "dataSource":"国家卫计委统计信息中心网站",
         "method": "get",
         "responseType": "html",
         "baseURL": "http://www.nhfpc.gov.cn/",
         "requireURL": "http://www.nhfpc.gov.cn/mohwsbwstjxxzx/s8208/list.shtml",
-        "tbTitle": [
+        "nextURL":"http://www.nhfpc.gov.cn/mohwsbwstjxxzx/s8208/list_{0}.shtml",
+        "tbHead": [
             "时间",
             "全国三级公立医院次均门诊费用",
             "全国三级公立医院次均门诊费用按当年价格上涨",
@@ -25,12 +109,12 @@
         "analysis_formulas": {
             "title_regular": "href=\"([\\w\\.\\/]+)\"",
             "page_regular": "共 .* 条 共 (.*?) 页",
-            "data_p1": "(.{9,10})，全国三级公立医院次均门诊费用为(.*?)元，与去年同期比较，按当年价格[上涨|下降](.*?)，按可比价格[上涨|下降](.*?)；二级公立医院次均门诊费用为(.*?)元，按当年价格同比[上涨|下降](.*?)，按可比价格[同比上涨|同比下降|与去年同期持平](.*?)。",
-            "data_p2": "全国三级公立医院人均住院费用为(.*?)元，与去年同期比较，按当年价格[上涨|下降](.*?)，按可比价格[上涨|下降](.*?)；二级公立医院人均住院费用为(.*?)元，按当年价格同比[上涨|下降](.*?)，按可比价格同比[上涨|下降](.*?)。"
+            "data_p1": "(.{8,10})，全国三级公立医院次均门诊费用为(.*?)元，与去年同期比较，按当年价格[上涨|下降](.*?)，按可比价格[上涨|下降](.*?)；二级公立医院次均门诊费用为(.*?)元，按当年价格同比[上涨|下降](.*?)，按可比价格([同比上涨|同比下降|与去年同期持平]{4,14}[\\d\\.%\\s]{0,6}).*",
+            "data_p2": "全国三级公立医院人均住院费用为(.*?)元，与去年同期比较，按当年价格[上涨|下降](.*?)，按可比价格[上涨|下降](.*?)；二级公立医院人均住院费用为(.*?)元，按当年价格同比[上涨|下降](.*?)，按可比价格([同比上涨|同比下降|与去年同期持平]{4,14}[\\d\\.%\\s]{0,6}).*"
         },
         "analysis_formula_sequence" : {
             "data_p1": "1,2,3,4,5,6,7",
-            "data_p2": "1,2,3,4"
+            "data_p2": "1,2,3,4,5,6"
         },
         "select_tag": [
             "div #xw_box > p",
@@ -38,18 +122,18 @@
         ],
         "replace_from": [
             ">",
-            "比上",
-            "比下",
+            "上涨",
+            "下降",
+            "同比",
             "涨",
-            "降",
-            "去年同期持平"
+            "与去年同期持平"
         ],
         "replace_to": [
             "",
             "",
-            "",
-            "",
             "-",
+            "",
+            "",
             "0.00%"
         ],
         "output_file": "tmp.csv"

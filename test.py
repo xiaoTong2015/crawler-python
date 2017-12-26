@@ -5,7 +5,9 @@ from urllib import request
 import time
 import re
 import json
-
+from urlFile import config
+import pymongo
+from pymongo import MongoClient
 
 #str='<a href="../../mohwsbwstjxxzx/s7967/201609/24aa89bbe81f424db54fe7312618f489.shtml" target="_blank" title="2016年1-7月全国二级以上公立医院病人费用情况">  2016年1-7月全国二级以上公立医院病人费用情况 </a>'
 #print(re.match(r'mohwsbwstjxxzx',str, re.M|re.I))
@@ -58,27 +60,39 @@ import json
 # last_page = 11
 # urls = ['http://www.nhfpc.gov.cn/mohwsbwstjxxzx/s8208/list_{0}.shtml'.format(str(i)) for i in range(2,int(str(last_page)))]
 # print(urls)
-a = webdriver.Firefox(executable_path='D:/Program Files (x86)/Mozilla Firefox/geckodriver')
-url = 'http://www.nhfpc.gov.cn/mohwsbwstjxxzx/s7967/201312/9924d4c1908244529604301007fb0e85.shtml'
-a.get(url)
-a.refresh()
-time.sleep(10)
-html = a.page_source
-#print(html)
-bs=BeautifulSoup(html, "html.parser")
-#print(bs.prettify())
-html_p = bs.select('div #xw_box > p')
-if not html_p:
-    html_p = bs.select('div #allStyleDIV > p')
-#print(html_p)
-html_p = str(html_p).replace("<span>","").replace("</span>","").replace("<span style=\"FONT-FAMILY: 仿宋_GB2312; COLOR: black; FONT-SIZE: 15pt\">","")
-item1 = re.search(r'(.{9,10})，全国三级公立医院次均门诊费用为(.*?)元，与去年同期比较，按当年价格([上涨|下降].*?)，按可比价格([上涨|下降].*?)；'
-                  r'二级公立医院次均门诊费用为(.*?)元，按当年价格同比([上涨|下降].*?)，按可比价格([同比上涨|同比下降|与去年同期持平]{4,7}[\d\.%]+).*',
-                  str(html_p)).groups()
-item2 = re.search(r'全国三级公立医院人均住院费用为(.*?)元，与去年同期比较，按当年价格([上涨|下降].*?)，按可比价格([上涨|下降].*?)；'
-                  r'二级公立医院人均住院费用为(.*?)元，按当年价格同比([上涨|下降].*?)，按可比价格([同比上涨|同比下降|与去年同期持平]{4,7}[\d\.%]+).*', str(html_p)).groups()
-print(item1+item2)
-a.close()
+# a = webdriver.Firefox(executable_path='D:/Program Files (x86)/Mozilla Firefox/geckodriver')
+# url = 'http://www.nhfpc.gov.cn/mohwsbwstjxxzx/s7967/201609/24aa89bbe81f424db54fe7312618f489.shtml'
+# a.get(url)
+# a.refresh()
+# time.sleep(10)
+# html = a.page_source
+# print(html)
+# a.close()
+# bs=BeautifulSoup(html, "html.parser")
+# print(bs.prettify())
+# html_p = bs.select('div #xw_box > p')
+# if not html_p:
+#     html_p = bs.select('div #allStyleDIV > p')
+#
+# html_p = str(html_p).replace("<span>","").replace("</span>","").replace("<span style=\"FONT-FAMILY: 仿宋_GB2312; COLOR: black; FONT-SIZE: 15pt\">","").replace(
+#         "<span style=\"FONT-SIZE: 16pt; FONT-FAMILY: 仿宋_GB2312; COLOR: black\">","").replace("<span style=\"FONT-SIZE: 14pt; FONT-FAMILY: 仿宋_GB2312; COLOR: black\">","").replace("\"","")
+# print(html_p)
+# # item1 = re.search(r'(.{8,10})，全国三级公立医院次均门诊费用为(.*?)元，与去年同期比较，按当年价格([上涨|下降].*?)，按可比价格([上涨|下降].*?)；'
+# #                   r'二级公立医院次均门诊费用为(.*?)元，按当年价格同比([上涨|下降].*?)，按可比价格([同比上涨|同比下降|与去年同期持平]{4,14}[\d\.%\s]{0,6}).*',
+# #                   str(html_p)).groups()
+# # item2 = re.search(r'全国三级公立医院人均住院费用为(.*?)元，与去年同期比较，按当年价格([上涨|下降].*?)，按可比价格([上涨|下降].*?)；'
+# #                   r'二级公立医院人均住院费用为(.*?)元，按当年价格同比([上涨|下降].*?)，按可比价格([同比上涨|同比下降|与去年同期持平]{4,14}[\d\.%\s]{0,6}).*', str(html_p)).groups()
+# item1 = []
+# item2 = []
+# group1 = re.split(',',config[0]['analysis_formula_sequence']['data_p1'])
+# group2 = re.split(',',config[0]['analysis_formula_sequence']['data_p2'])
+# for i in group1:
+#     item1.append(re.search(config[0]['analysis_formulas']['data_p1'],str(html_p)).group(int(i)))
+# for j in group2:
+#     item1.append(re.search(config[0]['analysis_formulas']['data_p2'],str(html_p)).group(int(j)))
+# print(item1+item2)
+#
+# a.close()
 
 
 # req = request.Request("http://www.moh.gov.cn/mohwsbwstjxxzx/s8208/list.shtml")
@@ -109,3 +123,45 @@ a.close()
 #
 # new_str = string.replace("<span>","").replace("</span>","").replace("<span style=\"FONT-FAMILY: 仿宋_GB2312; COLOR: black; FONT-SIZE: 15pt\">","")
 # print(new_str)
+# tb_all = []
+# item = ('>2013年上半年', '253.0', '上涨6.2%', '上涨3.7 %', '166.3', '上涨7.1%', '同比上涨4.6 %', '11717.2', '上涨3.5%', '上涨1.1%', '5016.3', '上涨2.5%', '同比上涨0.1%')
+# tb_all.append(','.join(item))
+# #print(tb_all[0])
+# file_csv = open('tmp.csv', 'w')
+# for i in tb_all:
+#     file_csv.write(i + '\n')
+# file_csv.close()
+
+#截图
+# driver = webdriver.Firefox()
+# driver.set_window_size(1200,2252)
+# driver.get('http://node1:8080/fdpp/nationwide.jsp')
+# time.sleep(10)
+# driver.save_screenshot('baidu.png')
+# driver.close()
+# driver.close()
+
+#load json
+# def load_json():
+#     with open('data.json', 'r', encoding='utf-8') as json_file:
+#         data = json.load(json_file)
+#         return data
+#
+# config = load_json()
+# print(config[0]['method'])
+
+# group1 = re.split(',',config[0]['analysis_formula_sequence']['data_p1'])
+# group2 = re.split(',',config[0]['analysis_formula_sequence']['data_p2'])
+# for i in group1:
+#     print(int(i))
+
+#connect mongodb
+client = MongoClient()
+client = MongoClient('mongodb://11.203.0.194:27017/')
+db = client.Test
+col = db.col
+str = [{"全国二级公立医院次均门诊费用按可比价格上涨": "0.9%", "全国三级公立医院人均住院费用按可比价格上涨": "0.7%", "全国三级公立医院人均住院费用按当年价格上涨": "2.8%", "全国二级公立医院人均住院费用按可比价格上涨": "1.3%", "全国二级公立医院次均门诊费用按当年价格上涨": "3.1%", "全国三级公立医院次均门诊费用按可比价格上涨": "2.7%", "全国二级公立医院人均住院费用": "5535.8", "全国三级公立医院人均住院费用": "12869.5", "全国三级公立医院次均门诊费用按当年价格上涨": "4.9%", "全国二级公立医院次均门诊费用": "188.2", "全国二级公立医院人均住院费用按当年价格上涨": "3.4%", "全国三级公立医院次均门诊费用": "289.5", "时间": "　2016年1-7月"}]
+col.insert(str)
+# dd = {'全国二级公立医院人均住院费用按可比价格上涨': '同比上涨1.3%', '全国三级公立医院次均门诊费用按当年价格上涨': '涨4.9%', '时间': '\u30002016年1-7月', '全国三级公立医院人均住院费用按当年价格上涨': '涨2.8%', '全国二级公立医院人均住院费用': '5535.8', '全国三级公立医院次均门诊费用': '289.5', '全国三级公立医院次均门诊费用按可比价格上涨': '涨2.7%', '全国三级公立医院人均住院费用按可比价格上涨': '涨0.7%', '全国二级公立医院人均住院费用按当年价格上涨': '涨3.4%', '全国二级公立医院次均门诊费用': '188.2', '全国二级公立医院次均门诊费用按当年价格上涨': '涨3.1%', '全国三级公立医院人均住院费用': '12869.5', '全国二级公立医院次均门诊费用按可比价格上涨': '同比上涨0.9%'}
+# print(json.dumps(dd,ensure_ascii=False))
+
