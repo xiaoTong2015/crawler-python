@@ -61,15 +61,17 @@ def get_dbclient():
 
 
 #将数据保存到数据库中
-def save_db(keylist,vallilst):
+def save_db(keylist, vallilst):
     json_list = []
     for list in vallilst:
         #print(dict(zip(keylist, list)))
         json_list.append(dict(zip(keylist, list)))
-    data = json.dumps(json_list,ensure_ascii=False)
-    print(data)
-    # client = get_dbclient()
-    # client.Test.col.insert(data)
+    client = get_dbclient()
+    db = client.Test
+    col = db.col
+    print(json_list)
+    if json_list:
+        col.insert(json_list)
     return True
 
 
@@ -77,16 +79,16 @@ bs = get_bs(url)
 get_newlink_list(bs)
 
 # #####################处理分页#######################
-# last page
-# last_page_text = bs.select('div .pagination_index_last')
-# last_page = re.search(config[0]['analysis_formulas']['page_regular'], str(last_page_text)).groups()[0]
-# # last_page_end
-# urls = [config[0]['nextURL'].format(str(i)) for i in
-#         range(2, int(last_page) + 1)]
-# for url in urls:
-#     print("NEXT PAGE：" + url)
-#     bs = get_bs(url)
-#     get_newlink_list(bs)
+#last page
+last_page_text = bs.select('div .pagination_index_last')
+last_page = re.search(config[0]['analysis_formulas']['page_regular'], str(last_page_text)).groups()[0]
+# last_page_end
+urls = [config[0]['nextURL'].format(str(i)) for i in
+        range(2, int(last_page) + 1)]
+for url in urls:
+    print("NEXT PAGE：" + url)
+    bs = get_bs(url)
+    get_newlink_list(bs)
 
 # ################处理页面上的字段信息################
 for url_item in link_list_new:
@@ -105,24 +107,36 @@ for url_item in link_list_new:
     item2 = []
     group1 = re.split(',',config[0]['analysis_formula_sequence']['data_p1'])
     group2 = re.split(',',config[0]['analysis_formula_sequence']['data_p2'])
-    for i in group1:
-        item1.append(re.search(config[0]['analysis_formulas']['data_p1'],str(html_p)).group(int(i)))
-    for j in group2:
-        item1.append(re.search(config[0]['analysis_formulas']['data_p2'],str(html_p)).group(int(j)))
+    #标记正则匹配是否出现错误
+    regexp_flag = True
+    if re.search(config[0]['analysis_formulas']['data_p1'],str(html_p)):
+        for i in group1:
+            item1.append(re.search(config[0]['analysis_formulas']['data_p1'],str(html_p)).group(int(i)))
+    else:
+        regexp_flag = False
+        print("PAGE：" + url_item + "，p1正则表达式出错！")
+    if re.search(config[0]['analysis_formulas']['data_p2'],str(html_p)):
+        for j in group2:
+            item1.append(re.search(config[0]['analysis_formulas']['data_p2'],str(html_p)).group(int(j)))
+    else:
+        regexp_flag = False
+        print("PAGE：" + url_item + "，p2正则表达式出错！")
     # item1 = re.search(config[0]['analysis_formulas']['data_p1'],
     #                   str(html_p)).groups()
     # item2 = re.search(config[0]['analysis_formulas']['data_p2'],
     #                   str(html_p)).groups()
-    item3 = item1 + item2
-    #tb_all.append(','.join(item3))
-    tb_all.append(item3)
-    # print(tb_all)
+    if regexp_flag:
+        item3 = item1 + item2
+        #tb_all.append(','.join(item3))
+        tb_all.append(item3)
+        # print(tb_all)
 # replace substring
 for t_index,t_value in enumerate(tb_all):
     for tt_index,tt_value in enumerate(t_value):
         for index,item in enumerate(config[0]['replace_from']):
             tb_all[t_index][tt_index] = tb_all[t_index][tt_index].replace(item, config[0]['replace_to'][index])
-print(tb_all)
+#print(tb_all)
+#print(tb_title,tb_all)
 save_db(tb_title, tb_all)
 # write to file
 # file_csv = open(config[0]['output_file'], 'w')
