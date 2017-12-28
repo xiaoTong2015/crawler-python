@@ -1,5 +1,34 @@
 [
     {
+        "pageNO": 2,
+        "name":"各省交通状况",
+        "dataSource":"国家统计局--地区数据--分省年度数据--公共管理、社会保障及其他",
+        "method": "get",
+        "responseType":"json",
+        "baseURL":"http://data.stats.gov.cn/",
+        "requireURL": "http://data.stats.gov.cn/easyquery.htm?m=getOtherWds&dbcode=fsnd&rowcode=zb&colcode=sj&wds=[]",
+        "nextURL": [
+            "http://data.stats.gov.cn/easyquery.htm?m=QueryData&dbcode=fsnd&rowcode=zb&colcode=sj&wds=[{\"wdcode\":\"reg\",\"valuecode\":\"%s\"}]&dfwds=[{\"wdcode\":\"zb\",\"valuecode\":\"%s\"}]"
+        ],
+        "plates": [{
+            "platename": "交通事故",
+            "platecode": "A0S01"
+        }],
+        "tbHead" : [
+            "机构",
+            "交通事故发生数总计(起)",
+            "交通事故死亡人数总计(人)",
+            "交通事故受伤人数总计(人)",
+            "交通事故直接财产损失总计(万元)"
+        ],
+        "fields": [{
+                "dateYear": "2015",
+                "fieldname": "交通事故发生数总计,交通事故死亡人数总计,交通事故受伤人数总计，交通事故直接财产损失总计",
+                "fieldcode": "A0S0101,A0S0102,A0S0103,A0S0104"
+        }],
+        "output_file": "demo2.csv"
+    },
+    {
         "pageNO": 4,
         "name": "各省经济发展水平",
         "dataSource": "国家统计局--地区数据--分省季度数据--人民生活",
@@ -8,8 +37,15 @@
         "baseURL":"http://data.stats.gov.cn/",
         "requireURL": "http://data.stats.gov.cn/easyquery.htm?m=getOtherWds&dbcode=fsnd&rowcode=zb&colcode=sj&wds=[]",
         "nextURL": [
-            "http://data.stats.gov.cn/search.htm?s=%s2015GDP&m=searchdata&db=&p=0",
-            "http://data.stats.gov.cn/easyquery.htm?m=QueryData&dbcode=fsnd&rowcode=zb&colcode=sj&wds=[{\"wdcode\":\"reg\",\"valuecode\":\"%s\"}]&dfwds=[{\"wdcode\":\"zb\",\"valuecode\":\"A0A00\"}]"],
+            "http://data.stats.gov.cn/easyquery.htm?m=QueryData&dbcode=fsjd&rowcode=zb&colcode=sj&wds=[{\"wdcode\":\"reg\",\"valuecode\":\"%s\"}]&dfwds=[{\"wdcode\":\"zb\",\"valuecode\":\"%s\"}]"
+        ],
+        "plates": [{
+            "platename": "地区生产总值",
+            "platecode": "A0101"
+        },{
+            "platename": "全体及分城乡居民收支基本情况",
+            "platecode": "A0300"
+        }],
         "tbHead": [
             "机构",
             "生产总值(亿元)",
@@ -20,7 +56,16 @@
             "城镇居民人均消费支出（元）",
             "农村居民人均消费支出（元）"
         ],
-        "output_file": "tmp.csv"
+        "fields": [{
+                "dateYear": "2017C",
+                "fieldname": "地区生产总值_累计值",
+                "fieldcode": "A010101"
+        },{
+            "dateYear": "2017C",
+            "fieldname": "居民人均可支配收入_累计值(元),城镇居民人均可支配收入_累计值(元),农村居民人均可支配收入_累计值(元),居民人均消费支出_累计值(元),城镇居民人均消费支出_累计值(元),农村居民人均消费支出_累计值(元)",
+            "fieldcode": "A030001,A030003,A030005,A030007,A030009,A030011"
+        }],
+        "output_file": "demo4.csv"
     },
     {
         "pageNO": 5,
@@ -30,55 +75,51 @@
         "responseType": "json",
         "baseURL":"http://data.stats.gov.cn/",
         "requireURL": "http://data.stats.gov.cn/easyquery.htm?m=getOtherWds&dbcode=fsnd&rowcode=zb&colcode=sj&wds=[]",
-        "nextURL": "http://data.stats.gov.cn/easyquery.htm?m=QueryData&dbcode=fsnd&rowcode=zb&colcode=sj&wds=[{\"wdcode\":\"reg\",\"valuecode\":\"%s\"}]&dfwds=[{\"wdcode\":\"zb\",\"valuecode\":\"%s\"}]",
+        "nextURL": [
+            "http://data.stats.gov.cn/easyquery.htm?m=QueryData&dbcode=fsnd&rowcode=zb&colcode=sj&wds=[{\"wdcode\":\"reg\",\"valuecode\":\"%s\"}]&dfwds=[{\"wdcode\":\"zb\",\"valuecode\":\"%s\"}]"
+        ],
         "plates": [{
-            "platename": "年末常住人口",
+            "platename": "总人口",
             "platecode": "A0301"
         },{
-            "platename": "人口密度",
+            "platename": "城市建设",
             "platecode": "A0B02"
         },{
-            "platename": "男性人口占比",
+            "platename": "人口数(人口抽样调查)",
             "platecode": "A030801"
         },{
-            "platename": "受教育程度",
+            "platename": "接受教育程度分人口数(人口抽样调查)",
             "platecode": "A030806"
         }],
         "tbHead": [
             "机构",
             "常住人口数（万人）",
             "人口密度（人/平方公里）",
-            "男性占比",
-            "大学程度占比",
-            "高中程度占比",
-            "初中占比",
-            "小学占比"
+            "人口数（人）",
+            "男性人口数（人）",
+            "6岁及6岁以上大学人口数（人）",
+            "6岁及6岁以上高中人口数（人）",
+            "6岁及6岁以上初中人口数（人）",
+            "6岁及6岁以上小学人口数（人）"
         ],
-        "fields": [
-            {
-                "fieldname": "常住人口数",
-                "fieldcode": "A030101"
-            },{
-                "fieldname": "人口密度",
-                "fieldcode": "A0B0205"
-            },{
-                "fieldname": "男性占比",
-                "fieldcode": "A03080102"
-            },{
-                "fieldname": "小学占比",
-                "fieldcode": "A03080607"
-            },{
-                "fieldname": "初中占比",
-                "fieldcode": "A0308060A"
-            },{
-                "fieldname": "高中程度占比",
-                "fieldcode": "A0308060D"
-            },{
-                "fieldname": "大学程度占比",
-                "fieldcode": "A0308060G"
-            }
-        ],
-        "output_file": "tmp.csv"
+        "fields": [{
+            "dateYear": "2015",
+            "fieldname": "常住人口数（万人）",
+            "fieldcode": "A030101"
+        },{
+            "dateYear": "2015",
+            "fieldname": "人口密度",
+            "fieldcode": "A0B0205"
+        },{
+            "dateYear": "2015",
+            "fieldname": "人口数,男性人口数",
+            "fieldcode": "A03080101,A03080102"
+        },{
+            "dateYear": "2015",
+            "fieldname": "大学人口数,高中人口数,初中人口数,小学人口数",
+            "fieldcode": "A0308060G,A0308060D,A0308060A,A03080607"
+        }],
+        "output_file": "demo5.csv"
     },
     {
         "pageNO": 6,
@@ -136,6 +177,6 @@
             "",
             "0.00%"
         ],
-        "output_file": "tmp.csv"
+        "output_file": "demo6.csv"
     }
 ]
